@@ -2,7 +2,8 @@
 #include "sniffer.h"
 
 int main(int argc, char *argv[]) {
-    doMainMenu();
+    printWelcomeMessage();
+    doMainMenu(argc, argv);
     
     return 0;
 }
