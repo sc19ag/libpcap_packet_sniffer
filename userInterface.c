@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "userInterface.h"
+#include "sniffer.h"
 
 void printWelcomeMessage() {
     printf("Welcome to a simple CLI packet analyser based on the C/C++ library libpcap\n");
@@ -11,11 +13,16 @@ void doMainMenu(int argc, char *argv[]) {
         
     while(choice != 4) {
         printf("\nPlease type the number of your choice:\n");
-        printf("1. Print packet details to the console");
-        printf("2. Print packet details to a file");
-        printf("3. Do both of the above");
-        printf("4. Exit the application");
+        printf("1. Print packet details to the console\n");
+        printf("2. Print packet details to a file\n");
+        printf("3. Do both of the above\n");
+        printf("4. Exit the application\n\n");
 
+        /*
+            Find a way to avoid a data type other than an integer being passed into choice from the user (via scanf here).
+            Whenever a value of a different type is entered by the user here, the program automatically executes this while loop
+            seemingly ad infinitum, due to a segmentation fault (in short, the program breaks/crashes ungracefully)
+        */
         scanf("%d", &choice);
 
         switch(choice) {
@@ -24,20 +31,20 @@ void doMainMenu(int argc, char *argv[]) {
             break;
 
             case 2:
-            doFileMenu();
+            doFileMenu(argc, argv);
             break;
 
             case 3:
-            doFileMenu();
+            doFileMenu(argc, argv);
             sniffToCli(argc, argv);
             break;
 
             case 4:
-            printf("\nBye!");
+            printf("\nBye!\n\n");
             exit(0);
 
             default:
-            fprintf(stderr, "\nError: Invalid option");
+            fprintf(stderr, "\nError: Invalid option\n");
             break;
         }
     }
@@ -46,18 +53,23 @@ void doMainMenu(int argc, char *argv[]) {
 void doFileMenu(int argc, char *argv[]) {
     int subChoice = 0;
     char buf[256];
-    const char *filePath;
+    char *filePath;
 
     printf("\nPlease type the number of your choice:\n");
-    printf("1. Enter file path");
-    printf("2. Main menu");
+    printf("1. Enter file path\n");
+    printf("2. Main menu\n\n");
 
+    /*
+        Find a way to avoid a data type other than an integer being passed into choice from the user (via scanf here).
+        Same problem as in doMainMenu.
+    */
     scanf("%d", &subChoice);
     switch(subChoice) {
         case 1:
-        printf("Please write the path of the file you wish to print to:");
+        printf("\nPlease write the path of the file you wish to print to: ");
         scanf("%s", &buf);
-        strcpy(filePath, buf); 
+        
+        filePath = strcpy(filePath, buf); 
         sniffToFile(argc, argv, filePath);
         break;
 
