@@ -60,14 +60,14 @@ void doFileMenu(int argc, char *argv[]) {
     printf("2. Main menu\n\n");
 
     /*
-        Find a way to avoid a data type other than an integer being passed into choice from the user (via scanf here).
+        Find a way to avoid a data type other than an integer being passed into subchoice from the user (via scanfs here).
         Same problem as in doMainMenu.
     */
     scanf("%d", &subChoice);
     switch(subChoice) {
         case 1:
         printf("\nPlease write the path of the file you wish to print to: ");
-        scanf("%s", &buf);
+        scanf("%s", &buf); // Try to understand why a compiler warning is triggered here aswell
         
         filePath = strcpy(filePath, buf); 
         sniffToFile(argc, argv, filePath);
