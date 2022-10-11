@@ -39,7 +39,9 @@ void sniffToCli(int argc, char *argv[]) {
                                 // be user input). 
 
     //struct bpf_program *filtPointer;
-    struct bpf_program filt;
+    struct bpf_program filt; // see if passing filtPointer to pcap_compile and pcap_setfilter, rather than &filt, works if you 
+                                // dynamically allocate memory to filtPointer right after declaring it i.e. before filtPointer is
+                                // used in the functions.
 
     memset(errbuf, 0, PCAP_ERRBUF_SIZE);
     
