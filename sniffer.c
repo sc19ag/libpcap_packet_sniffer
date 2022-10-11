@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <pcap/pcap.h>
 #include "sniffer.h"
 
@@ -35,21 +36,32 @@ void sniffToCli(int argc, char *argv[]) {
     bpf_u_int32 mask = 0;
 
     char *bpfFiltExp = NULL; // this will need to be passed to the function as parameter, once function works (should
-                                // be user input).
+                                // be user input). 
 
-    struct bpf_program *filtPointer;
+    //struct bpf_program *filtPointer;
+    struct bpf_program filt;
+
+    memset(errbuf, 0, PCAP_ERRBUF_SIZE);
     
     int pktCount = 5, counter; // This should be passed as a parameter, also, user input.
-
+    printf("fine at 43\n");
     pcap_findalldevs(alldevsp, errbuf);
+    printf("\nerrbuf after findalldevs: \n%s\n", errbuf);
+    printf("fine at 45\n");
     dev = (**alldevsp).name;
+    printf("fine at 47\n");
 
     devHandler = pcap_open_live(dev, MAXBYTESTOCAPTURE, 1, TCPDUMPTOMS, errbuf);
+    printf("\nerrbuf after open_live: \n%s\n", errbuf);
+    printf("fine at 50\n");
 
-    pcap_compile(devHandler, filtPointer, bpfFiltExp, 1, mask);
-    pcap_setfilter(devHandler, filtPointer);
+    pcap_compile(devHandler, &filt, bpfFiltExp, 1, mask);
+    printf("fine at 53\n");
+    pcap_setfilter(devHandler, &filt);
+    printf("fine at 55\n");
 
     pcap_loop(devHandler, pktCount, processPacket, (u_char*)&counter);
+    printf("fine at 58\n");
 
 }
 
