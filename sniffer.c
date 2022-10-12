@@ -7,14 +7,45 @@
 #define MAXBYTESTOCAPTURE 65535
 #define TCPDUMPTOMS 1000
 
+int getLinkOffset(pcap_t *devHandle) {
+    int offset = -1, linkLayType;
+
+    linkLayType = pcap_datalink(devHandle);
+
+    switch(linkLayType) {
+        case DLT_EN10MB:
+            offset = 14;
+            break;
+        
+        case DLT_IEEE802_11:
+            offset = 22;
+            break;
+        
+        case DLT_FDDI:
+            offset = 21;
+            break;
+        
+        case DLT_PPP_ETHER:
+            offset = 20;
+            break;
+        
+        case DLT_NULL:
+            offset = 4;
+            break;
+    }
+
+    return offset;
+}
+
 void processPacket(u_char *userarg, const struct pcap_pkthdr *pkthdr, const u_char *packet) {
     int *counter = (int *)userarg;
+    //int pkthdrNoLink = pkthdr->len - linkOffset;
 
     printf("\nPacket Count: %d\n", ++(*counter));
     printf("Packet Size: %d\n", pkthdr->len);
     printf("Packet Payload:\n");
 
-    for(int i = 0; i < pkthdr->len; i++) {
+    for(int i = 0; i < pkthdr->len; i++) { // change pkthdr->len to pkthdrNoLink
         if(isprint(packet[i])) {
             printf("%c ", packet[i]);
         } else {
@@ -40,6 +71,8 @@ void sniffToCli(int argc, char *argv[]) {
 
     //struct bpf_program *filtPointer;
     struct bpf_program filt;
+
+    int offs;
 
     memset(errbuf, 0, PCAP_ERRBUF_SIZE);
     
