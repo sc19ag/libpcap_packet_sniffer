@@ -72,11 +72,9 @@ void sniffToCli(int argc, char *argv[]) {
     //struct bpf_program *filtPointer;
     struct bpf_program filt;
 
-    int offs;
-
     memset(errbuf, 0, PCAP_ERRBUF_SIZE);
     
-    int pktCount = 5, counter; // This should be passed as a parameter, also, user input.
+    int pktCount = 5, counter, offs; // This should be passed as a parameter, also, user input.
     printf("fine at 43\n");
     pcap_findalldevs(alldevsp, errbuf);
     printf("\nerrbuf after findalldevs: \n%s\n", errbuf);
