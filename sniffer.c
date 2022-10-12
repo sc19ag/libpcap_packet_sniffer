@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <pcap/pcap.h>
 #include "sniffer.h"
 
 #define MAXBYTESTOCAPTURE 65535
