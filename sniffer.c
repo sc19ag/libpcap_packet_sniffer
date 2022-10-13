@@ -72,27 +72,87 @@ void sniffToCli(int argc, char *argv[]) {
     //struct bpf_program *filtPointer;
     struct bpf_program filt;
 
+    const unsigned char **pktdatap = NULL;
+    unsigned char *pktdata = NULL;
+    struct pcap_pkthdr **pkthdrp = NULL;
+    struct pcap_pkthdr *pkthdr = NULL;
+
     memset(errbuf, 0, PCAP_ERRBUF_SIZE);
     
-    int pktCount = 5, counter, offs; // This should be passed as a parameter, also, user input.
-    printf("fine at 43\n");
+    int pktCount = 5; // pktCount should be passed as a parameter, also, user input.
+    int linkOffset = 0, pkthdrNoLink = 0; 
+    printf("fine at 82\n");
     pcap_findalldevs(alldevsp, errbuf);
     printf("\nerrbuf after findalldevs: \n%s\n", errbuf);
-    printf("fine at 45\n");
+    printf("fine at 85\n");
     dev = (**alldevsp).name;
-    printf("fine at 47\n");
+    printf("fine at 87\n");
 
     devHandler = pcap_open_live(dev, MAXBYTESTOCAPTURE, 1, TCPDUMPTOMS, errbuf);
     printf("\nerrbuf after open_live: \n%s\n", errbuf);
-    printf("fine at 50\n");
+    printf("fine at 91\n");
 
     pcap_compile(devHandler, &filt, bpfFiltExp, 1, mask);
-    printf("fine at 53\n");
+    printf("fine at 94\n");
     pcap_setfilter(devHandler, &filt);
-    printf("fine at 55\n");
+    printf("fine at 96\n");
 
-    pcap_loop(devHandler, pktCount, processPacket, (u_char*)&counter);
-    printf("fine at 58\n");
+    int errorCheck, pktCounter = 0;
+    char *errorMessage = "";
+    while(1) {
+        ++pktCounter;
+        errorCheck = pcap_next_ex(devHandler, pkthdrp, pktdatap);
+        switch(errorCheck) {
+            case 1:
+                printf("Packet %d has been captured\n\n", pktCounter);
+                break;
+            
+            case 0:
+                fprintf(stderr, "Err: Buffer timeout expired.\n");
+                break;
+
+            case PCAP_ERROR_BREAK:
+                fprintf(stderr, "Err: No more packets to read from savefile.\n");
+                break;
+            
+            case PCAP_ERROR_NOT_ACTIVATED:
+                fprintf(stderr, "Err: Capture handle created, but not activated.\n");
+                break;
+            
+            case PCAP_ERROR:
+                errorMessage = pcap_geterr(devHandler);
+                fprintf(stderr, "%s\n", errorMessage);
+                break;
+        }
+
+        printf("fine at 103\n");
+        pktdata = *pktdatap;
+        printf("fine at 105\n");
+        pkthdr = *pkthdrp;
+        printf("fine at 107\n");
+
+        linkOffset = getLinkOffset(devHandler);
+        printf("fine at 110\n");
+        pkthdrNoLink = pkthdr->len - linkOffset;
+        printf("fine at 112\n");
+
+        printf("\nPacket Count: %d\n", pktCounter);
+        printf("Packet Size: %d\n", pkthdr->len);
+        printf("Packet Payload:\n");
+
+        for(int i = linkOffset; i < pkthdrNoLink; i++) {
+            if(isprint(pktdata[i])) {
+                printf("%c ", pktdata[i]);
+            } else {
+                printf("? ");
+            }
+
+            if((i % 8 == 0 && i != 0) || i == pkthdrNoLink-1) {
+                printf("\n");
+            }
+        }        
+    }
+    printf("\nfine at end of loop %d\n", pktCounter);
 
 }
 
