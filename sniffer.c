@@ -72,14 +72,16 @@ void sniffToCli(int argc, char *argv[]) {
     //struct bpf_program *filtPointer;
     struct bpf_program filt;
 
-    const unsigned char **pktdatap = NULL;
+    const unsigned char **pktdatap;
     unsigned char *pktdata = NULL;
-    struct pcap_pkthdr **pkthdrp = NULL;
+    pktdatap = &pktdata;
+    struct pcap_pkthdr **pkthdrp;
     struct pcap_pkthdr *pkthdr = NULL;
+    pkthdrp = &pkthdr;
 
     memset(errbuf, 0, PCAP_ERRBUF_SIZE);
     
-    int pktCount = 5; // pktCount should be passed as a parameter, also, user input.
+    const int pktCount = 5; // pktCount should be user input, passed as a parameter to this function.
     int linkOffset = 0, pkthdrNoLink = 0; 
     printf("fine at 82\n");
     pcap_findalldevs(alldevsp, errbuf);
@@ -97,9 +99,13 @@ void sniffToCli(int argc, char *argv[]) {
     pcap_setfilter(devHandler, &filt);
     printf("fine at 96\n");
 
-    int errorCheck, pktCounter = 0;
+    /*
+    TODO: find a way to free the packet buffer after each packet has been printed to the console 
+    */
+    int errorCheck, pktCounter = 0, loopI = 0;
     char *errorMessage = "";
-    while(1) {
+    while(loopI < pktCount) {
+        printf("\nLoop %d\n", ++loopI);
         ++pktCounter;
         errorCheck = pcap_next_ex(devHandler, pkthdrp, pktdatap);
         switch(errorCheck) {
@@ -125,16 +131,12 @@ void sniffToCli(int argc, char *argv[]) {
                 break;
         }
 
-        printf("fine at 103\n");
-        pktdata = *pktdatap;
-        printf("fine at 105\n");
-        pkthdr = *pkthdrp;
-        printf("fine at 107\n");
+        printf("fine at 130\n");
 
         linkOffset = getLinkOffset(devHandler);
-        printf("fine at 110\n");
+        printf("fine at 133\n");
         pkthdrNoLink = pkthdr->len - linkOffset;
-        printf("fine at 112\n");
+        printf("fine at 135\n");
 
         printf("\nPacket Count: %d\n", pktCounter);
         printf("Packet Size: %d\n", pkthdr->len);
@@ -150,9 +152,9 @@ void sniffToCli(int argc, char *argv[]) {
             if((i % 8 == 0 && i != 0) || i == pkthdrNoLink-1) {
                 printf("\n");
             }
-        }        
+        }
+        printf("\nfine at end of loop %d\n", pktCounter);        
     }
-    printf("\nfine at end of loop %d\n", pktCounter);
 
 }
 
